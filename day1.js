@@ -1,16 +1,9 @@
-import fs from "node:fs";
-import { URL, fileURLToPath } from "node:url";
-import readline from "node:readline";
+import { createReader } from "./reader.js";
 
-const dirname = fileURLToPath(new URL(".", import.meta.url));
-
-const input = fs.createReadStream(`${dirname}./inputs/1.txt`);
-
-const reader = readline.createInterface({ input });
-
-let max = 0;
+const reader = createReader("1.txt");
 
 let sum = 0;
+let max = 0;
 
 reader.on("line", (line) => {
   if (line === "") {
