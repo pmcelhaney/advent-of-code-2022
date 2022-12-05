@@ -2,8 +2,6 @@ import { createReader } from "./reader.js";
 
 const reader = createReader("5.txt");
 
-let sum = 0;
-
 const stacks = [[], [], [], [], [], [], [], [], []];
 
 function readItemsOnStacks(line) {
@@ -41,11 +39,9 @@ function parseMove(line) {
 }
 
 function executeMove({ howMany, from, to }) {
-  for (let remaining = howMany; remaining > 0; remaining -= 1) {
-    const item = stacks[from - 1].pop();
+  const items = stacks[from - 1].splice(-1 * howMany);
 
-    stacks[to - 1].push(item);
-  }
+  stacks[to - 1].push(...items);
 }
 
 function topOfEachStack() {
@@ -61,12 +57,8 @@ reader.on("line", (line) => {
     console.log(stacks);
     executeMove(parseMove(line));
   }
-
-  sum += 1;
 });
 
 reader.on("close", () => {
-  console.log("-----");
-  console.log(stacks);
   console.log(topOfEachStack());
 });
