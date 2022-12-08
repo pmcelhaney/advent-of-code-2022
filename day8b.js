@@ -1,14 +1,14 @@
 import { readInput } from "./reader.js";
 
-const heights = [];
+const grid = [];
 
-function countVisibleTrees(tree, trees) {
-  const count = trees.findIndex((x) => x >= tree);
+function countVisibleTrees(height, heights) {
+  const count = heights.findIndex((x) => x >= height);
 
-  return count === -1 ? trees.length : count + 1;
+  return count === -1 ? heights.length : count + 1;
 }
 
-function maxScenicScore(grid) {
+function maxScenicScore() {
   let max = 0;
 
   grid.forEach((row, y) => {
@@ -30,7 +30,7 @@ function maxScenicScore(grid) {
 readInput(
   "8.txt",
   (line) => {
-    heights.push(line.split("").map(Number));
+    grid.push(line.split("").map(Number));
   },
-  () => maxScenicScore(heights)
+  () => maxScenicScore()
 );
