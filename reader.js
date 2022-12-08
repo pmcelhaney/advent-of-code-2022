@@ -9,3 +9,14 @@ export function createReader(filename) {
 
   return readline.createInterface({ input });
 }
+
+export function readInput(filename, readLine, answer) {
+  const reader = createReader(filename);
+
+  reader.on("line", readLine);
+
+  reader.on("close", () => {
+    // eslint-disable-next-line no-console, no-undef
+    console.log(answer());
+  });
+}
