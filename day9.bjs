@@ -1,19 +1,7 @@
 import { readInput } from "./reader.js";
 
-const rope = [
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-  [0, 0],
-];
+const H = [0, 0];
+const T = [0, 0];
 
 const visited = new Set();
 
@@ -35,29 +23,22 @@ function move(direction, distance) {
   };
 
   for (let steps = 0; steps < distance; steps += 1) {
-    rope[0][0] += deltaY[direction];
-    rope[0][1] += deltaX[direction];
+    H[0] += deltaY[direction];
+    H[1] += deltaX[direction];
 
-    for (let index = 0; index < rope.length - 2; index += 1) {
-      const H = rope[index];
-      const T = rope[index + 1];
-
-      closeGap(H, T);
-
-      if (index === 8) {
-        visited.add(T.join(","));
-      }
-    }
+    closeGap();
+    visited.add(T.join(","));
+    print();
   }
 }
 
-function closeGap(H, T) {
+function closeGap() {
   if (
     T[0] !== H[0] &&
     T[1] !== H[1] &&
     (Math.abs(T[0] - H[0]) > 1 || Math.abs(T[1] - H[1]) > 1)
   ) {
-    return closeGapDiagonal(H, T);
+    return closeGapDiagonal();
   }
 
   while (T[0] < H[0] - 1) {
@@ -77,7 +58,7 @@ function closeGap(H, T) {
   }
 }
 
-function closeGapDiagonal(H, T) {
+function closeGapDiagonal() {
   if (T[0] < H[0]) {
     T[0] += 1;
   }
@@ -95,11 +76,34 @@ function closeGapDiagonal(H, T) {
   }
 }
 
+function print() {
+  return;
+
+  const grid = Array.from({ length: 10_000 }, () =>
+    Array.from({ length: 10_000 }, () => ".")
+  );
+
+  grid[T[0]][T[1]] = "T";
+  grid[H[0]][H[1]] = "H";
+
+  const copy = Array.from(grid);
+
+  console.log(
+    `${copy
+      .reverse()
+      .map((row) => row.join(""))
+      .join("\n")}\n\n`
+  );
+}
+
+print();
+
 readInput(
   "9.txt",
   (line) => {
     const [direction, distance] = line.split(" ");
 
+    console.log(`\n\n== ${line} ==`);
     move(direction, Number(distance));
   },
   () => visited.size
