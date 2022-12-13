@@ -13,7 +13,10 @@ export function createReader(filename) {
 export function readInput(filename, readLine, answer) {
   const reader = createReader(filename);
 
-  reader.on("line", readLine);
+  let lineNumber = 0;
+
+  // eslint-disable-next-line no-plusplus
+  reader.on("line", (line) => readLine(line, lineNumber++));
 
   reader.on("close", () => {
     // eslint-disable-next-line no-console, no-undef
