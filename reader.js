@@ -11,6 +11,8 @@ export function createReader(filename) {
 }
 
 export function readInput(filename, readLine, answer) {
+  performance.mark("start");
+
   const reader = createReader(filename);
 
   let lineNumber = 0;
@@ -18,8 +20,16 @@ export function readInput(filename, readLine, answer) {
   // eslint-disable-next-line no-plusplus
   reader.on("line", (line) => readLine(line, lineNumber++));
 
-  reader.on("close", () => {
+  reader.on("close", async () => {
     // eslint-disable-next-line no-console, no-undef
-    console.log(answer());
+    console.log(`Answer: ${answer()}`);
+
+    performance.mark("end");
+
+    console.log(
+      `Completed in ${Math.round(
+        performance.measure("time", "start", "end").duration
+      )}ms`
+    );
   });
 }

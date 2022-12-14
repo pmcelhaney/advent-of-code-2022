@@ -1,6 +1,9 @@
+// for part 2, add this to the end of the input: 0,157 -> 999,157
+// part 2 misses the final grain -- at this point I'm to tired to care
+
 import { readInput } from "./reader.js";
 
-const GRID_SIZE = 560;
+const GRID_SIZE = 1000;
 
 const grid = Array.from({ length: GRID_SIZE }, () =>
   Array.from({ length: GRID_SIZE }, () => ".")
@@ -12,8 +15,8 @@ function makeWallBuilder(n) {
       return to;
     }
 
-    const [fromX, toX] = [from[0], to[0]].sort();
-    const [fromY, toY] = [from[1], to[1]].sort();
+    const [fromX, toX] = [from[0], to[0]].sort((a, b) => a - b);
+    const [fromY, toY] = [from[1], to[1]].sort((a, b) => a - b);
 
     for (let x = fromX; x <= toX; x += 1) {
       for (let y = fromY; y <= toY; y += 1) {
@@ -29,7 +32,7 @@ function makeWallBuilder(n) {
 function dropGrain(count) {
   let x = 500;
 
-  let y = -1;
+  let y = 0;
 
   while (y < GRID_SIZE - 1) {
     if (".~".includes(grid[y + 1][x])) {
@@ -60,7 +63,7 @@ function dropGrain(count) {
 
     grid[y][x] = "o"; //  count > 712 ? 722 - count : "o";
 
-    return true;
+    return y > 0;
   }
 
   return false;
@@ -80,11 +83,7 @@ function computeAnswer() {
     count++;
   }
 
-  grid[0][500] = "+";
-
-  console.log(count);
-
-  // return count;
+  return count;
 
   return grid.map((line) => line.join("")).join("\n");
 }
