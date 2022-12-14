@@ -1,27 +1,19 @@
 import { readInput } from "./reader.js";
 
-const pairs = [];
+const packets = [[[2]], [[6]]];
 
-function readLine(line, lineNumber) {
-  if (lineNumber % 3 === 2) {
+function readLine(line) {
+  if (line === "") {
     return;
   }
 
-  const data = JSON.parse(line);
-
-  if (lineNumber % 3 === 0) {
-    pairs.push([data]);
-  }
-
-  if (lineNumber % 3 === 1) {
-    pairs.at(-1).push(data);
-  }
+  packets.push(JSON.parse(line));
 }
 
 // eslint-disable-next-line max-statements
 function compare(a, b) {
   if (typeof a === "number" && typeof b === "number") {
-    return b - a;
+    return a - b;
   }
 
   if (typeof a === "number") {
@@ -40,14 +32,18 @@ function compare(a, b) {
     }
   }
 
-  return b.length - a.length;
+  return a.length - b.length;
 }
 
 function computeAnswer() {
-  return pairs.reduce(
-    (sum, pair, index) => (compare(...pair) >= 0 ? sum + index + 1 : sum),
-    0
-  );
+  packets.sort(compare);
+
+  const two =
+    packets.findIndex((packet) => JSON.stringify(packet) === "[[2]]") + 1;
+  const six =
+    packets.findIndex((packet) => JSON.stringify(packet) === "[[6]]") + 1;
+
+  return two * six;
 }
 
 readInput("13.txt", readLine, computeAnswer);
