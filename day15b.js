@@ -7,7 +7,7 @@ import { readInput } from "./reader.js";
 const data = [];
 
 function readLine(line) {
-  data.push(line.match(/\d+/gu).map(Number));
+  data.push(line.match(/[-\d]+/gu).map(Number));
 }
 
 function processSensors(targetLineIndex) {
@@ -44,8 +44,6 @@ function processSensors(targetLineIndex) {
 function computeAnswerForTargetLine(targetLineIndex, size) {
   const [sensors, outOfRange, totalArea] = processSensors(targetLineIndex);
 
-  console.log("total area", totalArea);
-
   const starts = sensors.map((s) => s[0]);
 
   let index = Math.max(0, Math.min(...starts));
@@ -58,7 +56,7 @@ function computeAnswerForTargetLine(targetLineIndex, size) {
     if (ranges.length > 0) {
       const newIndex = Math.min(end, Math.max(...ranges.map((s) => s[1])));
 
-      console.log("from", index, "to", newIndex);
+      // console.log("from", index, "to", newIndex);
 
       index = newIndex + 1;
     } else {
@@ -98,7 +96,7 @@ function computeAnswer() {
     const maybeAnswer = computeAnswerForTargetLine(index, size);
 
     if (maybeAnswer) {
-      return [index, maybeAnswer];
+      return [maybeAnswer, index, maybeAnswer * 4_000_000 + index];
     }
   }
 }
