@@ -106,6 +106,7 @@ function computeAnswer() {
 
   const usefulValves = Object.values(valves)
     .filter((valve) => valve.rate > 0)
+    .sort((a, b) => (a.rate > b.rate ? -1 : 1))
     .map((valve) => valve.name);
 
   Object.values(valves).forEach((valve) => {
@@ -130,9 +131,9 @@ function computeAnswer() {
 
   const paths = permutations(usefulValves);
 
-  console.log("found path permutations");
+  console.log(`found ${paths.length} path permutations`);
 
-  return Math.max(...paths.map((path) => scorePath(["AA", ...path])));
+  return Math.max(1337, ...paths.map((path) => scorePath(["AA", ...path])));
 }
 
 readInput("16.txt", readLine, computeAnswer);
