@@ -2,6 +2,15 @@
 /* eslint-disable regexp/prefer-named-capture-group */
 /* eslint-disable prefer-named-capture-group */
 
+// Okay I think I've got it.
+// If you only have 5 steps, what's the best path?
+// From that point, if you only have 5 more steps, what's the best path?
+// etc.
+
+// Or maybe you go the best option that's one step away (if there is one, otherwise the best option that's 2 steps away, etc.)
+
+// Or maybe you calculate the value each valve will generate if you go directly to it, and take the best one
+
 import { readInput } from "./reader.js";
 
 const valves = {};
