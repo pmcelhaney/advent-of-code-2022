@@ -58,6 +58,50 @@ function calculateDistanceBetweenValves(start, end, steps = 0, visited = []) {
   );
 }
 
+// make this a generator
+// we only need to take 10 items
+// give each of the 15 a chance to go first
+// give each of the remaining 14 a chance to go second
+// give each of the remaining 13 a chance to go third
+// etc.
+// So we have an array of 10 integers
+// The first one counts from 0 to 14
+// The second one counts from 0 to 13, then increments the first and resets to 0
+// etc.
+// when the first integer hits 15 we're done
+
+// This isn't quite right but it's close.
+function* permutationGenerator(items, count = 10) {
+  const digit = Array.from(items, () => 0);
+
+  let position = 0;
+
+  while (digit[count - 1] < items.length) {
+    if (digit[position] === items.length - position) {
+      position += 1;
+
+      if (position > count) {
+        position = 0;
+      }
+
+      digit[position] = 0;
+    }
+
+    // now use the 10 digits to make a permutation
+    const available = Array.from({ length: count }, () => true);
+    const permutation = [];
+
+    for (let index = 0; index < count; index += 1) {
+      permutation.push(items[available.indexOf(true, index)]);
+      available[index] = false;
+    }
+
+    console.log(digit);
+    yield permutation;
+    digit[position] += 1;
+  }
+}
+
 function permutations(array) {
   if (array.length === 1) {
     return [array];
