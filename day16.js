@@ -70,6 +70,8 @@ function calculateDistanceBetweenValves(start, end, steps = 0, visited = []) {
 // etc.
 // when the first integer hits 15 we're done
 
+// ah crap that would still be 15 billion permutations (https://www.wolframalpha.com/input?i=10+permutations+of+15)
+
 // This isn't quite right but it's close.
 function* permutationGenerator(items, count = 10) {
   const digit = Array.from(items, () => 0);
