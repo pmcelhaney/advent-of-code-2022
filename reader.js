@@ -22,7 +22,7 @@ export function readInput(filename, readLine, answer) {
 
   reader.on("close", async () => {
     // eslint-disable-next-line no-console, no-undef
-    console.log(`Answer: ${answer()}`);
+    console.log("Answer:", answer());
 
     performance.mark("end");
 
