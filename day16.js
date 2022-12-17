@@ -10,6 +10,11 @@
 // Or maybe you go the best option that's one step away (if there is one, otherwise the best option that's 2 steps away, etc.)
 
 // Or maybe you calculate the value each valve will generate if you go directly to it, and take the best one
+// Wait, that sounds reasonable.
+// Because if A and then B is better than B and then C, and I only have time for one of them, surely A is better?
+// And that fits with this being a simple programming problem, not friggin waiting travel salesman.
+// Oh, no, that doesn't work because B might have half the rate of A, but B is a small detour on the way to A.
+// So if I only have 2 steps left, go directly to A. If I have 3 steps, I can go to B and then A.
 
 import { readInput } from "./reader.js";
 
@@ -156,6 +161,32 @@ function scorePath(path) {
   return score;
 }
 
+function computeAnswer2(room, openValves, clock) {
+  if (clock <= 0) {
+    return 0;
+  }
+
+  const next = openValves.map((name, index) => [
+    name,
+    openValves.filter((_, position) => position !== index),
+    clock - valves[name].distances[room] - 1, // clock - time to reach next room - time to open this valve
+  ]);
+
+  const score = valves[room].rate * clock;
+
+  // get the score for this room (for AA it will be 0)
+  // get the score for each of the next rooms
+  // return this score plus max of the next rooms
+
+  return (
+    score +
+    Math.max(
+      0,
+      ...next.map(([name, open, clock]) => computeAnswer2(name, open, clock))
+    )
+  );
+}
+
 function computeAnswer() {
   // find the minimum distance from each point to every other point
 
@@ -172,6 +203,8 @@ function computeAnswer() {
       );
     });
   });
+
+  return computeAnswer2("AA", usefulValves, 30);
 
   console.log("found minimum distances");
 
