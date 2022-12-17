@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 /* eslint-disable regexp/prefer-named-capture-group */
 /* eslint-disable prefer-named-capture-group */
 
@@ -53,19 +54,62 @@ function calculateDistanceBetweenValves(start, end, steps = 0, visited = []) {
   );
 }
 
-function computeAnswer2(me, elephant, openValves, clock) {
-  if (clock <= 0) {
+const MINUTES = 30;
+
+function computeAnswer2(
+  me,
+  elephant,
+  openValves,
+  clock = 0,
+  timeUntilValveIsOpen = 0
+) {
+  console.log(`\n== Minute ${clock} ==`);
+
+  if (clock >= MINUTES) {
+    console.log("clock has run out");
+
     return 0;
+  }
+
+  if (timeUntilValveIsOpen === 2) {
+    console.log("you move to valve", me);
+  }
+
+  if (timeUntilValveIsOpen === 1) {
+    console.log("you open valve", me);
+  }
+
+  if (timeUntilValveIsOpen > 1) {
+    return computeAnswer2(
+      me,
+      elephant,
+      openValves,
+      clock + 1,
+      timeUntilValveIsOpen - 1
+    );
   }
 
   const next = openValves.map((name, index) => [
     name,
     elephant,
     openValves.filter((_, position) => position !== index),
-    clock - valves[name].distances[me] - 1, // clock - time to reach next room - time to open this valve
+    clock + 1,
+    valves[name].distances[me] + 1,
   ]);
 
-  const score = valves[me].rate * clock;
+  console.log("next", next);
+
+  const score = valves[me].rate * (MINUTES - clock);
+
+  console.log(
+    "valve is now open -- score is",
+    score,
+    "for",
+    me,
+    "with",
+    MINUTES - clock,
+    "minutes left"
+  );
 
   // get the score for this room (for AA it will be 0)
   // get the score for each of the next rooms
@@ -75,8 +119,8 @@ function computeAnswer2(me, elephant, openValves, clock) {
     score +
     Math.max(
       0,
-      ...next.map(([us, them, open, remainingTime]) =>
-        computeAnswer2(us, them, open, remainingTime)
+      ...next.map(([us, them, open, remainingTime, myTime]) =>
+        computeAnswer2(us, them, open, remainingTime, myTime)
       )
     )
   );
@@ -100,7 +144,7 @@ function computeAnswer() {
   });
   console.log("found minimum distances");
 
-  return computeAnswer2("AA", "AA", usefulValves, 26);
+  return computeAnswer2("AA", "AA", usefulValves);
 }
 
 readInput("16.txt", readLine, computeAnswer);
