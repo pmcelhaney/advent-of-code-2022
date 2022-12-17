@@ -53,18 +53,19 @@ function calculateDistanceBetweenValves(start, end, steps = 0, visited = []) {
   );
 }
 
-function computeAnswer2(room, openValves, clock) {
+function computeAnswer2(me, elephant, openValves, clock) {
   if (clock <= 0) {
     return 0;
   }
 
   const next = openValves.map((name, index) => [
     name,
+    elephant,
     openValves.filter((_, position) => position !== index),
-    clock - valves[name].distances[room] - 1, // clock - time to reach next room - time to open this valve
+    clock - valves[name].distances[me] - 1, // clock - time to reach next room - time to open this valve
   ]);
 
-  const score = valves[room].rate * clock;
+  const score = valves[me].rate * clock;
 
   // get the score for this room (for AA it will be 0)
   // get the score for each of the next rooms
@@ -74,8 +75,8 @@ function computeAnswer2(room, openValves, clock) {
     score +
     Math.max(
       0,
-      ...next.map(([name, open, remainingTime]) =>
-        computeAnswer2(name, open, remainingTime)
+      ...next.map(([us, them, open, remainingTime]) =>
+        computeAnswer2(us, them, open, remainingTime)
       )
     )
   );
@@ -99,7 +100,7 @@ function computeAnswer() {
   });
   console.log("found minimum distances");
 
-  return computeAnswer2("AA", usefulValves, 30);
+  return computeAnswer2("AA", "AA", usefulValves, 26);
 }
 
 readInput("16.txt", readLine, computeAnswer);
