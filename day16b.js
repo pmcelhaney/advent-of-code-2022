@@ -54,76 +54,126 @@ function calculateDistanceBetweenValves(start, end, steps = 0, visited = []) {
   );
 }
 
-const MINUTES = 30;
+function reportValveState(remainingValves) {
+  const openValves = remainingValves.filter(
+    (valve) => valves[valve].rate === 0 && !remainingValves.includes(valve)
+  );
 
+  console.log("Valves", openValves, "are open");
+}
+
+const MINUTES = 26;
+
+// eslint-disable-next-line max-params
 function computeAnswer2(
-  me,
-  elephant,
-  openValves,
+  myPosition,
+  remainingValves,
+  elephantPosition = myPosition,
   clock = 0,
-  timeUntilValveIsOpen = 0
+  myRemainingTime = 0,
+  elephantRemainingTime = 0
 ) {
-  console.log(`\n== Minute ${clock} ==`);
+  //   console.log(`== Minute ${clock} ==`);
+  //   reportValveState(remainingValves);
 
   if (clock >= MINUTES) {
-    console.log("clock has run out");
+    // console.log("clock has run out");
 
-    return 0;
+    return { score: 0, path: [] };
   }
 
-  if (timeUntilValveIsOpen === 2) {
-    console.log("you move to valve", me);
-  }
+  //   if (myRemainingTime === 1) {
+  //     console.log("you arrived at valve", myPosition, "and are about to open it");
+  //   }
 
-  if (timeUntilValveIsOpen === 1) {
-    console.log("you open valve", me);
-  }
+  //   if (myRemainingTime > 0 && myRemainingTime !== 1) {
+  //     console.log("you are on your way to valve", myPosition);
+  //   }
 
-  if (timeUntilValveIsOpen > 1) {
-    return computeAnswer2(
-      me,
-      elephant,
-      openValves,
-      clock + 1,
-      timeUntilValveIsOpen - 1
+  //   if (myRemainingTime === 0) {
+  //     console.log(
+  //       "you opened valve",
+  //       myPosition,
+  //       "and now you're planning your next move"
+  //     );
+  //   }
+
+  const isMyValveOpen = myRemainingTime === 0;
+  const isElephantValveOpen = elephantRemainingTime === 0;
+
+  const next = [];
+  const valvesOpened = [];
+
+  if (isMyValveOpen) {
+    // console.log(
+    //   "you opened valve",
+    //   myPosition,
+    //   "and now you're planning your next move"
+    // );
+    valvesOpened.push(myPosition);
+    next.push(
+      ...remainingValves.map((name, index) => [
+        name,
+        remainingValves.filter((_, position) => position !== index),
+        elephantPosition,
+        clock + 1,
+        valves[name].distances[myPosition],
+        elephantRemainingTime,
+      ])
     );
   }
 
-  const next = openValves.map((name, index) => [
-    name,
-    elephant,
-    openValves.filter((_, position) => position !== index),
-    clock + 1,
-    valves[name].distances[me] + 1,
-  ]);
+  if (isElephantValveOpen) {
+    // console.log(
+    //   "elephant opened valve",
+    //   elephantPosition,
+    //   "and now it's planning its next move"
+    // );
+    valvesOpened.push(elephantPosition.toLowerCase());
+    next.push(
+      ...remainingValves.map((name, index) => [
+        myPosition,
+        remainingValves.filter((_, position) => position !== index),
+        name,
+        clock + 1,
+        myRemainingTime,
+        valves[name].distances[elephantPosition],
+      ])
+    );
+  }
 
-  console.log("next", next);
+  if (!isMyValveOpen && !isElephantValveOpen) {
+    next.push([
+      myPosition,
+      remainingValves,
+      elephantPosition,
+      clock + 1,
+      myRemainingTime - 1,
+      elephantRemainingTime - 1,
+    ]);
+  }
 
-  const score = valves[me].rate * (MINUTES - clock);
+  const myScore = isMyValveOpen
+    ? valves[myPosition].rate * (MINUTES - clock)
+    : 0;
 
-  console.log(
-    "valve is now open -- score is",
-    score,
-    "for",
-    me,
-    "with",
-    MINUTES - clock,
-    "minutes left"
+  const elephantScore = isElephantValveOpen
+    ? valves[elephantPosition].rate * (MINUTES - clock)
+    : 0;
+
+  const bestCase = next.reduce(
+    (incumbent, args) => {
+      const challenger = computeAnswer2(...args);
+
+      return challenger.score > incumbent.score ? challenger : incumbent;
+    },
+    { score: 0, path: [] }
   );
 
-  // get the score for this room (for AA it will be 0)
-  // get the score for each of the next rooms
-  // return this score plus max of the next rooms
-
-  return (
-    score +
-    Math.max(
-      0,
-      ...next.map(([us, them, open, remainingTime, myTime]) =>
-        computeAnswer2(us, them, open, remainingTime, myTime)
-      )
-    )
-  );
+  return {
+    score: myScore + elephantScore + bestCase.score,
+    path: [...valvesOpened, ...bestCase.path],
+  };
 }
 
 function computeAnswer() {
@@ -144,7 +194,7 @@ function computeAnswer() {
   });
   console.log("found minimum distances");
 
-  return computeAnswer2("AA", "AA", usefulValves);
+  return computeAnswer2("AA", usefulValves);
 }
 
 readInput("16.txt", readLine, computeAnswer);
