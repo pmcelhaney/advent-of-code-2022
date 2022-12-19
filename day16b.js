@@ -56,14 +56,38 @@ function calculateDistanceBetweenValves(start, end, steps = 0, visited = []) {
 }
 
 function reportValveState(remainingValves) {
-  const openValves = remainingValves.filter(
-    (valve) => valves[valve].rate === 0 && !remainingValves.includes(valve)
+  const openValves = Object.values(valves).filter(
+    (valve) => valve.rate > 0 && !remainingValves.includes(valve.name)
   );
 
-  console.log("Valves", openValves, "are open");
+  const pressure = openValves.reduce((sum, valve) => sum + valve.rate, 0);
+
+  return `Valves ${openValves
+    .map((v) => v.name)
+    .join(", ")} are open, releasing ${pressure} pressure`;
 }
 
 const MINUTES = 26;
+
+function pairsFromList(list, ordered) {
+  if (list.length < 2) {
+    return [];
+  }
+
+  const [head, ...tail] = list;
+
+  return [
+    ...tail.flatMap((item) =>
+      ordered
+        ? [
+            [head, item],
+            [item, head],
+          ]
+        : [[head, item]]
+    ),
+    ...pairsFromList(tail, ordered),
+  ];
+}
 
 // eslint-disable-next-line max-params
 function computeAnswer2(
@@ -84,7 +108,7 @@ function computeAnswer2(
   if (clock >= MINUTES) {
     events.push("clock has run out");
 
-    return { score: 0, path: [] };
+    return { score: 0, events: [], myPath: [], elephantPath: [] };
   }
 
   if (myRemainingTime === 1) {
@@ -113,87 +137,99 @@ function computeAnswer2(
       `you and the elephant opened valves ${myPosition} and ${elephantPosition} and now you're planning your next moves`
     );
 
-    next.push(
-      ...remainingValves.map((name, index) => [
-        name,
-        remainingValves.filter((_, position) => position !== index),
-        elephantPosition,
-        clock + 1,
-        valves[name].distances[myPosition],
-        elephantRemainingTime,
-      ])
-    );
+    if (remainingValves.length === 0) {
+      events.push("there are no valves left so you're done");
+    } else if (remainingValves.length === 1) {
+      const [lastValve] = remainingValves;
 
-    // eslint-disable-next-line unicorn/no-array-push-push
-    next.push(
-      ...remainingValves.map((name, index) => [
-        myPosition,
-        remainingValves.filter((_, position) => position !== index),
-        name,
-        clock + 1,
-        myRemainingTime,
-        valves[name].distances[elephantPosition],
-      ])
-    );
+      const isElephantFurther =
+        valves[lastValve].distances[myPosition] <
+        valves[lastValve].distances[elephantPosition];
 
-    if (remainingValves.length < 2) {
       events.push(
-        "there is only one valve left so whoever is closest takes it"
+        `there is only one valve left (${lastValve}) so you ${
+          isElephantFurther ? "you" : "the elephant"
+        } will take it`
       );
-    } else {
-      // TODO define the pairs
-      const pairs = [];
 
+      if (isElephantFurther) {
+        next.push([
+          lastValve,
+          [],
+          elephantPosition,
+          clock + 1,
+          valves[myPosition].distances[lastValve],
+          MINUTES - clock - 1,
+        ]);
+      } else {
+        next.push(
+          ...remainingValves.map((name) => [
+            myPosition,
+            [],
+            lastValve,
+            clock + 1,
+            MINUTES - clock - 1,
+            valves[elephantPosition].distances[name],
+          ])
+        );
+      }
+    } else {
+      const pairs = pairsFromList(
+        remainingValves,
+        elephantPosition !== myPosition
+      );
+
+      events.push(
+        `your collective options are ${pairs
+          .map(([me, elephant]) => `${me}/${elephant}`)
+          .join(", ")}`
+      );
       next.push(
         ...pairs.map(([me, elephant]) => [
-          myPosition,
-          remainingValves.filter((name) => ![me, elephant].includes(name)),
           me,
+          remainingValves.filter((name) => ![me, elephant].includes(name)),
+          elephant,
           clock + 1,
-          valves[me].distances[myPosition],
-          valves[elephant].distances[elephantPosition],
+          valves[myPosition].distances[me],
+          valves[elephantPosition].distances[elephant],
         ])
       );
-
-      events.push("your collective options are [todo figure this out]");
     }
   }
 
   if (isMyValveOpen && !isElephantValveOpen) {
-    events.push(
-      `you opened valve ${myPosition} and now you're planning your next move`
-    );
-
     const nextMove = remainingValves.map((name, index) => [
       name,
       remainingValves.filter((_, position) => position !== index),
       elephantPosition,
       clock + 1,
-      valves[name].distances[myPosition],
+      valves[myPosition].distances[name],
       elephantRemainingTime,
     ]);
 
-    next.push(...nextMove);
+    events.push(
+      `you opened valve ${myPosition} and now you're planning your next move; your options are ${nextMove.map(
+        (x) => x[2]
+      )}`
+    );
 
-    events.push(`your options are as follows: ${nextMove.map((x) => x[2])}`);
+    next.push(...nextMove);
   }
 
   if (isElephantValveOpen && !isMyValveOpen) {
-    events.push(
-      `elephant opened valve ${elephantPosition} and now it's planning its next move`
-    );
-
     const nextMove = remainingValves.map((name, index) => [
       myPosition,
       remainingValves.filter((_, position) => position !== index),
       name,
       clock + 1,
       myRemainingTime,
-      valves[name].distances[elephantPosition],
+      valves[elephantPosition].distances[name],
     ]);
 
     events.push(
-      `elephant options are as follows: ${nextMove.map((x) => x[2])}`
+      `elephant opened valve ${elephantPosition} and planning its next move; its options are: ${nextMove.map(
+        (x) => x[2]
+      )}`
     );
 
     next.push(...nextMove);
@@ -222,15 +258,52 @@ function computeAnswer2(
     (incumbent, args) => {
       const challenger = computeAnswer2(...args);
 
-      return challenger.score > incumbent.score ? challenger : incumbent;
+      return (challenger.cheat && !incumbent.cheat) ||
+        challenger.score > incumbent.score
+        ? challenger
+        : incumbent;
     },
-    { score: 0, path: [] }
+    { score: 0, events: [], myPath: [], elephantPath: [] }
   );
 
-  return {
+  const closedValves = remainingValves;
+
+  if (!isMyValveOpen) {
+    closedValves.push(myPosition);
+  }
+
+  if (!isElephantValveOpen) {
+    closedValves.push(elephantPosition);
+  }
+
+  events.push(reportValveState(closedValves));
+
+  const result = {
     score: myScore + elephantScore + bestCase.score,
-    path: [events, ...bestCase.path],
+    events: [events, ...bestCase.events],
+    myPath: [myPosition, ...bestCase.myPath],
+    elephantPath: [elephantPosition, ...bestCase.elephantPath],
+    cheat: bestCase.cheat,
   };
+
+  if (
+    clock === 1 &&
+    myPosition === "JJ" &&
+    elephantPosition === "BB"
+
+    // ||
+    // result.myPath
+    //   .reduce((a, b) => (a.slice(-2) === b ? a : `${a}${b}`), "")
+    //   .startsWith("JJBB")
+  ) {
+    console.log(result);
+
+    throw new Error("cheat");
+
+    return { ...result, cheat: true };
+  }
+
+  return result;
 }
 
 function computeAnswer() {
