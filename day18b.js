@@ -35,28 +35,34 @@ function readLine(line) {
   max = Math.max(max, ...point);
 }
 
-function findAirCells(point) {
-  if (
-    point.some((coordinate) => coordinate < min - 1 || coordinate > max + 1)
-  ) {
-    return;
-  }
+function findAirCells() {
+  const cellsToCheck = [[1, 1, 1]];
 
-  const key = point.join(",");
+  while (cellsToCheck.length > 0) {
+    iterations += 1;
 
-  if (air[key] || points[key]) {
-    return;
-  }
+    const point = cellsToCheck.pop();
 
-  air[key] = true;
+    if (
+      point.some((coordinate) => coordinate < min - 1 || coordinate > max + 1)
+    ) {
+      continue;
+    }
 
-  for (const s of sides(point)) {
-    findAirCells(s);
+    const key = point.join(",");
+
+    if (air[key] || points[key]) {
+      continue;
+    }
+
+    air[key] = true;
+
+    cellsToCheck.push(...sides(point));
   }
 }
 
 function computeAnswer() {
-  findAirCells([1, 1, 1]);
+  findAirCells();
 
   return input.reduce(
     (sum, cube) => sum + sides(cube).filter((side) => air[side]).length,
