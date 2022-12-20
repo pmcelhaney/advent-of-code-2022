@@ -17,6 +17,7 @@ module.exports = {
 
   rules: {
     "no-magic-numbers": "off",
+    "max-statements": "off",
   },
 
   overrides: [
