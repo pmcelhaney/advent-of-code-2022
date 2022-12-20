@@ -10,29 +10,37 @@ function move(array, index, position) {
   const value = array[index];
 
   array.splice(index, 1);
+
   array.splice(position, 0, value);
 
   return array;
 }
 
 function computeAnswer() {
-  const sequence = Array.from(input);
-  const numbers = Array.from(input);
+  const sequence = Array.from(input, (value, index) => ({ index, value }));
+  const numbers = Array.from(input, (value, index) => ({
+    index,
+    value,
+  }));
 
-  for (const value of sequence) {
-    const currentPosition = numbers.indexOf(value);
-    const sum = currentPosition + value;
-
-    move(
-      numbers,
-      currentPosition,
-      sum > sequence.length ? (sum + 1) % sequence.length : sum
+  for (const item of sequence) {
+    const currentPosition = numbers.findIndex(
+      (number) => number.index === item.index
     );
+    const sum = currentPosition + item.value;
+
+    const nextPosition = sum % (numbers.length - 1);
+
+    move(numbers, currentPosition, nextPosition);
   }
 
+  const zeroIndex = numbers.findIndex((n) => n.value === 0);
+
   const keys = [1000, 2000, 3000].map(
-    (n) => numbers[(n + numbers.indexOf(0)) % numbers.length]
+    (n) => numbers[(n + zeroIndex) % numbers.length].value
   );
+
+  console.log(keys);
 
   return keys.reduce((a, b) => a + b, 0);
 }
