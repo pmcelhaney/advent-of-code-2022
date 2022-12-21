@@ -5,14 +5,13 @@
 
 // Hmm, the fact that decryptionKeyOffset is % 7 whereas the other offsets are % 6 is interesting.
 
+// Chinese Remainder Theorem (I think)
+// ((num % mod) * (key % mod) + offset) % mod === (num * key + offset) % mod
+
 import { readInput } from "./reader.js";
 
 const DECRYPTION_KEY = 811_589_153;
 const ROUNDS = 10;
-const TOO_LOW = 10_072_632_977_883;
-const TOO_HIGH = 9_007_199_254_740_991;
-
-/* max safe  */ 9_007_199_254_740_991;
 
 const input = [];
 
@@ -37,18 +36,18 @@ function computeAnswer() {
     value,
   }));
 
-  const decryptionKeyOffset = DECRYPTION_KEY % numbers.length;
+  const spaces = numbers.length - 1;
 
-  console.log("offset", decryptionKeyOffset);
+  const keyRemainder = DECRYPTION_KEY % spaces;
 
   for (let round = 0; round < ROUNDS; round++) {
     for (const item of sequence) {
       const currentPosition = numbers.findIndex(
         (number) => number.index === item.index
       );
-      const sum = currentPosition + item.value + decryptionKeyOffset;
 
-      const nextPosition = sum % (numbers.length - 1);
+      const nextPosition =
+        (currentPosition + (item.value % spaces) * keyRemainder) % spaces;
 
       move(numbers, currentPosition, nextPosition);
     }
@@ -56,23 +55,13 @@ function computeAnswer() {
 
   const zeroIndex = numbers.findIndex((n) => n.value === 0);
 
-  console.log(numbers);
-
   const keys = [1000, 2000, 3000].map((n) =>
     Number(numbers[(n + zeroIndex) % numbers.length].value)
   );
 
   console.log(keys);
 
-  const answer = keys.reduce((a, b) => a + b, Number(0)) * DECRYPTION_KEY;
-
-  if (answer <= TOO_LOW) {
-    throw new Error(`Answer is too low: ${answer}`);
-  }
-
-  if (answer >= TOO_HIGH) {
-    throw new Error(`Answer is too high: ${answer}`);
-  }
+  return keys.reduce((a, b) => a + b, Number(0)) * DECRYPTION_KEY;
 }
 
 readInput("20.txt", readLine, computeAnswer);
