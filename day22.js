@@ -5,7 +5,7 @@ const grid = [];
 const rotations = [];
 const distances = [];
 
-let gridWidth = 0;
+const GRID_WIDTH = 101;
 
 const location = { x: 1, y: 1 };
 
@@ -34,12 +34,15 @@ function rotate({ x, y }, rotation) {
 
 function readLine(line, index) {
   if (index === 0) {
-    gridWidth = line.length;
-    grid.push(Array.from({ length: gridWidth }, () => " "));
+    grid.push(Array.from({ length: GRID_WIDTH }, () => "-"));
   }
 
   if (line.includes(".")) {
-    grid.push([" ", ...line.split("")]);
+    grid.push([
+      "-",
+      ...line.split("").map((char) => (char === " " ? "-" : char)),
+      ...Array.from({ length: GRID_WIDTH - line.length - 1 }, () => "-"),
+    ]);
   }
 
   if (line.includes("R")) {
@@ -65,7 +68,7 @@ function revertStep() {
 function moveThroughEmptySpace() {
   console.log("move through empty space");
 
-  while (grid?.[location.y]?.[location.x] === " ") {
+  while (grid?.[location.y]?.[location.x] === "-") {
     moveOneStep();
   }
 
