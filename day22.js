@@ -11,23 +11,43 @@ const location = { x: 1, y: 1 };
 
 let direction = { x: 1, y: 0 };
 
+const hits = {
+  rotate1: false,
+  rotate2: false,
+  rotate3: false,
+  rotate4: false,
+  revertStep: false,
+  wrapRight: false,
+  wrapLeft: false,
+  wrapUp: false,
+  wrapDown: false,
+};
+
 // eslint-disable-next-line complexity
 function rotate({ x, y }, rotation) {
   // spent way too long trying to come up with a simple formula for this
 
   if (x === 1 && y === 0) {
+    hits.rotate1 = true;
+
     return rotation === "L" ? { x: 0, y: -1 } : { x: 0, y: 1 };
   }
 
   if (x === 0 && y === -1) {
+    hits.rotate2 = true;
+
     return rotation === "L" ? { x: -1, y: 0 } : { x: 1, y: 0 };
   }
 
   if (x === -1 && y === 0) {
+    hits.rotate3 = true;
+
     return rotation === "L" ? { x: 0, y: 1 } : { x: 0, y: -1 };
   }
 
   if (x === 0 && y === 1) {
+    hits.rotate4 = true;
+
     return rotation === "L" ? { x: 1, y: 0 } : { x: -1, y: 0 };
   }
 }
@@ -59,8 +79,11 @@ function moveOneStep() {
 }
 
 function revertStep() {
+  hits.revertStep = true;
   location.x -= direction.x;
   location.y -= direction.y;
+
+  moveThroughEmptySpace();
 
   console.log("bounce back to", location.x, location.y);
 }
@@ -79,19 +102,23 @@ function wrapAround() {
   console.log("wrap around");
 
   if (direction.x === 1) {
+    hits.wrapRight = true;
     location.x = 0;
   }
 
   if (direction.x === -1) {
-    location.x = gridWidth - 1;
+    hits.wrapLeft = true;
+    location.x = GRID_WIDTH - 1;
   }
 
   if (direction.y === 1) {
+    hits.wrapDown = true;
     location.y = 0;
   }
 
   if (direction.y === -1) {
-    location.y = gridWidth - 1;
+    hits.wrapUp = true;
+    location.y = grid.length - 1;
   }
 
   moveThroughEmptySpace();
@@ -150,13 +177,19 @@ function computeAnswer() {
       console.log("rotate", rotation);
       direction = rotate(direction, rotation);
     } else {
-      console.log("done", rotations);
+      console.log("done");
     }
   });
 
-  console.log(grid.map((row) => row.join("")).join("\n"));
+  console.log(location, direction);
+  console.log(hits);
+
+  grid[location.y][location.x] = "X";
+  console.log(grid.map((row) => row.join("").replaceAll("-", " ")).join("\n"));
 
   return location.y * 1000 + location.x * 4 + facingScore();
 }
 
 readInput("22.txt", readLine, computeAnswer);
+
+// 148362
