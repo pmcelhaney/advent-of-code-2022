@@ -18,6 +18,14 @@ module.exports = {
   rules: {
     "no-magic-numbers": "off",
     "max-statements": "off",
+    "no-plusplus": "off",
+    "no-console": "warn",
+    "max-params": "off",
+  },
+
+  env: {
+    es2022: true,
+    node: true,
   },
 
   overrides: [

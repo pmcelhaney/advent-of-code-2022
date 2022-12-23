@@ -12,6 +12,7 @@
   "dependencies": {
     "@walgreenshealth/eslint-plugin": "^0.0.3",
     "eslint": "^8.29.0",
-    "eslint-config-hardcore": "^26.0.0"
+    "eslint-config-hardcore": "^26.0.0",
+    "jest": "^29.3.1"
   }
 }

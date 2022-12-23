@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import { URL, fileURLToPath } from "node:url";
 import readline from "node:readline";
+import { performance } from "node:perf_hooks";
+import { inherits } from "node:util";
 
 const dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -10,19 +12,20 @@ export function createReader(filename) {
   return readline.createInterface({ input });
 }
 
-export function readInput(filename, readLine, answer) {
+export function test(filename, readLine, answer, hash) {
   performance.mark("start");
 
   const reader = createReader(filename);
 
   let lineNumber = 0;
 
-  // eslint-disable-next-line no-plusplus
   reader.on("line", (line) => readLine(line, lineNumber++));
 
-  reader.on("close", async () => {
-    // eslint-disable-next-line no-console, no-undef
-    console.log("Answer:", answer());
+  reader.on("close", () => {
+    const result = answer(commands, initialState);
+
+    console.log("Result:", result);
+    console.log("Answer:", hash(computation));
 
     performance.mark("end");
 

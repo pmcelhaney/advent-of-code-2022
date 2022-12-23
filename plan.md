@@ -7,7 +7,8 @@ function parseLine(line, index) {
   // returns a command object 
 }
 
-function computeAnswer(commands, index) {
+
+function computeAnswer(commands, initialState) {
   // creates whatever state is needed, loops over the commands, calculates, and returns the answer
 }
 
@@ -18,6 +19,13 @@ function hash(answer) {
 }
 
 
+function preProcessLine(preProcess, line, index) {
+  return preProcess(line);
+  // returns {line?, answer?, hash?, initialState?}
+  // optional, overrides the regular preprocessing for cases where
+  // I want to put S and E characters on a map 
+}
+
 // This function finds out what day + part to run from process.argv
 // It then runs through all of the input files in the corresponding directory
 // If the input file has a line starting with $$answer: it reports whether the answer is correct
@@ -25,5 +33,5 @@ function hash(answer) {
 // If there's a line with $$min: or $$max: it tells me if the answer is definitely wrong per feedback from previous wrong answers
 // (The $$ lines are not passed to parseLine, of course)
 // Otherwise it reports the answer and the hash 
-test(parseLine, computeAnswer, hash);
+test( parseLine, computeAnswer, hash, preProcessLine);
 ```
