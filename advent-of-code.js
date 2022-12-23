@@ -12,31 +12,31 @@ function createReader(filename) {
 }
 
 function consumeLineDefault(line) {
-  if (line.startsWith("ANSWER1= ")) {
+  if (line.startsWith("ANSWER1=")) {
     return {
       lines: [],
-      answer1: line.slice(9).trim(),
+      answer1: line.slice(8).trim(),
     };
   }
 
-  if (line.startsWith("RESULT1= ")) {
+  if (line.startsWith("RESULT1=")) {
     return {
       lines: [],
-      result1: JSON.parse(line.slice(9)),
+      result1: JSON.parse(line.slice(8)),
     };
   }
 
-  if (line.startsWith("ANSWER2= ")) {
+  if (line.startsWith("ANSWER2=")) {
     return {
       lines: [],
-      answer2: line.slice(9),
+      answer2: line.slice(8),
     };
   }
 
-  if (line.startsWith("RESULT2= ")) {
+  if (line.startsWith("RESULT2=")) {
     return {
       lines: [],
-      result2: JSON.parse(line.slice(9)),
+      result2: JSON.parse(line.slice(8)),
     };
   }
 
@@ -97,7 +97,7 @@ function testOne({
 
     if (
       context[`answer${part}`] !== undefined &&
-      hashResult !== context[`answer${part}`]
+      hashResult.toString() !== context[`answer${part}`]
     ) {
       console.error(
         `Puzzle ${puzzleNumber} part ${part} with input "${inputFilename}" failed (hash)`
@@ -113,10 +113,12 @@ function testOne({
         performance.measure("time", "start", "end").duration
       )}ms total, ${Math.round(
         performance.measure("time", "start", "end").duration
-      )}ms for computation`
+      )}ms for computation (`,
+      hashResult,
+      ")"
     );
 
-    if (context[`result${part}`] !== undefined) {
+    if (context[`answer${part}`] !== undefined) {
       return;
     }
 
@@ -152,10 +154,10 @@ if (inputName && !/^[a-z-]+$/iu.test(inputName)) {
 const inputFiles = await readdir(`${dirname}/inputs/${puzzleNumber}`);
 
 const matchingInputFiles = inputFiles.filter((filename) =>
-  inputName.includes(filename)
+  filename.includes(inputName)
 );
 
-inputFiles.forEach(async (filename) => {
+matchingInputFiles.forEach(async (filename) => {
   // eslint-disable-next-line import/no-dynamic-require
   const instructions = await import(`./${puzzleNumber}-${part}.js`);
 
@@ -172,3 +174,9 @@ inputFiles.forEach(async (filename) => {
 
   testOne(testInstructions);
 });
+
+if (matchingInputFiles.length === 0) {
+  console.error(
+    `No input files found for puzzle ${puzzleNumber} matching "${inputName}"`
+  );
+}
