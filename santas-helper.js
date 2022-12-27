@@ -3,6 +3,8 @@ import readline from "node:readline";
 import { createReadStream } from "node:fs";
 import { readdir } from "node:fs/promises";
 
+import { stringify } from "flatted";
+
 const dirname = fileURLToPath(new URL(".", import.meta.url));
 
 function createReader(filename) {
@@ -82,7 +84,7 @@ function testOne({
 
     if (
       context[`result${part}`] !== undefined &&
-      JSON.stringify(answer) !== JSON.stringify(context[`result${part}`])
+      stringify(answer) !== stringify(context[`result${part}`])
     ) {
       console.error(
         `Puzzle ${puzzleNumber} part ${part} with input "${inputFilename}" failed`
