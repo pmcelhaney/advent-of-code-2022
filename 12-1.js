@@ -1,11 +1,13 @@
 let cache;
 
 function memoShortestDistance(grid, start, end, path) {
-  if (cache[`${start},${end}`]) {
-    return cache[`${start},${end}`];
+  const key = `${start.x},${start.y}`;
+
+  if (cache[key]) {
+    return cache[key];
   }
 
-  return shortestDistance(grid, start, end, path);
+  return (cache[key] = shortestDistance(grid, start, end, path));
 }
 
 function shortestDistance(grid, start, end, path = []) {
@@ -34,13 +36,16 @@ function shortestDistance(grid, start, end, path = []) {
 
   return (
     1 +
-    Math.min(
-      ...neighbors.map((neighbor) =>
+    Array.from(
+      neighbors.map((neighbor) =>
         memoShortestDistance(grid, neighbor, end, [
           ...path,
           `${start.x},${start.y}`,
         ])
       )
+    ).reduce(
+      (min, distance) => Math.min(min, distance),
+      Number.POSITIVE_INFINITY
     )
   );
 }
@@ -70,7 +75,7 @@ export function computeAnswer(instructions) {
   const endRow = instructions.findIndex((row) => row.includes("E"));
   const endColumn = instructions[endRow].indexOf("E");
 
-  return shortestDistance(
+  return memoShortestDistance(
     grid,
     { x: startColumn, y: startRow },
     { x: endColumn, y: endRow }
@@ -78,5 +83,7 @@ export function computeAnswer(instructions) {
 }
 
 export function hash(x) {
+  console.log(cache);
+
   return x;
 }
