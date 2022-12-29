@@ -1,3 +1,13 @@
+let cache;
+
+function memoShortestDistance(grid, start, end, path) {
+  if (cache[`${start},${end}`]) {
+    return cache[`${start},${end}`];
+  }
+
+  return shortestDistance(grid, start, end, path);
+}
+
 function shortestDistance(grid, start, end, path = []) {
   if (start.x === end.x && start.y === end.y) {
     return 0;
@@ -26,7 +36,7 @@ function shortestDistance(grid, start, end, path = []) {
     1 +
     Math.min(
       ...neighbors.map((neighbor) =>
-        shortestDistance(grid, neighbor, end, [
+        memoShortestDistance(grid, neighbor, end, [
           ...path,
           `${start.x},${start.y}`,
         ])
@@ -39,6 +49,8 @@ export function parseLine(line) {
   return line.split("");
 }
 export function computeAnswer(instructions) {
+  cache = {};
+
   const grid = instructions.map((row) =>
     row.map((cell) => {
       if (cell === "S") {
