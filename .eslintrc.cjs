@@ -21,6 +21,7 @@ module.exports = {
     "no-plusplus": "off",
     "no-console": "warn",
     "max-params": "off",
+    "no-continue": "off",
   },
 
   env: {
