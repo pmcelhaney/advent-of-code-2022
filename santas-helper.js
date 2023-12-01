@@ -8,7 +8,7 @@ import { stringify } from "flatted";
 const dirname = fileURLToPath(new URL(".", import.meta.url));
 
 function createReader(filename) {
-  const input = createReadStream(`${dirname}./inputs/${filename}`);
+  const input = createReadStream(`${dirname}inputs/${filename}`);
 
   return readline.createInterface({ input });
 }
@@ -58,7 +58,7 @@ function testOne({
 }) {
   performance.mark("start");
 
-  const reader = createReader(`${puzzleNumber}/${inputFilename}`);
+  const reader = createReader(`${inputFilename}`);
 
   const commands = [];
 
@@ -153,10 +153,10 @@ if (inputName && !/^[a-z-]+$/iu.test(inputName)) {
   );
 }
 
-const inputFiles = await readdir(`${dirname}/inputs/${puzzleNumber}`);
+const inputFiles = await readdir(`${dirname}inputs`);
 
 const matchingInputFiles = inputFiles.filter((filename) =>
-  filename.includes(inputName)
+  filename.startsWith(`${puzzleNumber}-${part}`)
 );
 
 matchingInputFiles.forEach(async (filename) => {
